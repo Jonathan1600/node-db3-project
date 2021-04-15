@@ -14,7 +14,7 @@ const checkSchemeId = async (req, res, next) => {
   try {
     const scheme = await Scheme.findById(scheme_id)
     if (!scheme) {
-      res.status(404).json({ message: "scheme with scheme_id <actual id> not found" })
+      res.status(404).json({ message: `scheme with scheme_id ${scheme_id} not found` })
     } else {
       req.scheme = scheme
       next()
@@ -32,13 +32,22 @@ const checkSchemeId = async (req, res, next) => {
     "message": "invalid scheme_name"
   }
 */
-const validateScheme = (req, res, next) => {
+const validateScheme = async (req, res, next) => {
   const schemeName = req.body.scheme_name;
+  let nameTaken = false;
 
-  if (!schemeName) {
-    res.status(404)
+  if (!schemeName || schemeName.length < 1 || typeof schemeName != "string") {
+    res.status(400).json({
+      message: "invalid scheme_name"
+    })
   } else {
-    next()
+    const schemes = await Scheme.find()
+    schemes.forEach(element => {
+      if (element.schemeName == schemeName) {
+        nameTaken = true;
+      }
+    });
+    nameTaken ? res.status(400).json({ message: "invalid scheme_name" }) : next()
   }
 }
 
@@ -59,7 +68,7 @@ const validateStep = (req, res, next) => {
     !body.step_number ||
     typeof body.step_number != "number" ||
     body.step_number < 1) {
-    res.status(404).json({
+    res.status(400).json({
       "message": "invalid step"
     })
   } else {

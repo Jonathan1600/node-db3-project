@@ -98,12 +98,12 @@ const findById = async (scheme_id) => { // EXERCISE B
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
 
-  if (!dbData) {
+  if (!dbData || dbData.length < 1) {
     return null
   }
 
   const newData = {
-    scheme_id: scheme_id,
+    scheme_id: parseInt(scheme_id),
     scheme_name: dbData[0].scheme_name,
     steps: []
   }
@@ -170,7 +170,7 @@ const addStep = async (scheme_id, step) => { // EXERCISE E
     and resolves to _all the steps_ belonging to the given `scheme_id`,
     including the newly created one.
   */
-  await db("steps").insert({ ...step, scheme_id: scheme_id })
+  await db("steps").insert({ ...step, scheme_id: parseInt(scheme_id) })
 
   return findSteps(scheme_id);
 }
